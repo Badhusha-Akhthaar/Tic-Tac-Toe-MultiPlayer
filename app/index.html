@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Tic Tac Toe</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-/bQdsTh/da6pkI1MST/rWKFNjaCP5gBSY4sEBT38Q/9RBh9AH40zEOg7Hlq2THRZ" crossorigin="anonymous"></script>
+</head>
+<body>
+<div class="card">
+    <div class="card-body">
+        <form action="/game" method="GET">
+            <div class="mb-3">
+                <label for="roomid" class="form-label">Room ID</label>
+                <input type="text" class="form-control" id="roomid" name="roomid" readonly="readonly">
+            </div>
+            <button type="submit" class="btn btn-primary">Create Room</button>
+        </form>
+    </div>
+</div>
+<div class="list-group" style="padding-top: 20px" id="allrooms">
+</div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="jquery.min.js"></script>
+    <script type="text/javascript">
+        document.getElementById("roomid").value=Math.random().toString(36).substr(2, 5).toUpperCase();
+        var socket = io()
+        socket.on('connect',()=>{
+            socket.emit('getrooms',(allrooms)=>{
+                allrooms.forEach(roomName=>{
+                    var roomList = document.getElementById("allrooms");
+                    var button = document.createElement("button")
+                    button.setAttribute("class","list-group-item list-group-item-action")
+                    button.setAttribute("type","button")
+                    button.setAttribute("id",`ROOM_${roomName}`);
+                    button.setAttribute("onclick",`buttonClick(ROOM_${roomName})`)
+                    button.innerText = roomName;
+                    roomList.appendChild(button);
+                })
+            });
+
+            /////
+            socket.on("updatedrooms",(updatedrooms)=>{
+                var roomList = document.getElementById("allrooms");
+                while (roomList.firstChild){
+                    roomList.removeChild(roomList.lastChild)
+                }
+                updatedrooms.forEach(roomName=>{
+                    var button = document.createElement("button")
+                    button.setAttribute("class","list-group-item list-group-item-action")
+                    button.setAttribute("type","button")
+                    button.setAttribute("id",`ROOM_${roomName}`);
+                    button.setAttribute("onclick",`buttonClick(ROOM_${roomName})`)
+                    button.innerText = roomName;
+                    roomList.appendChild(button);
+                })
+            })
+        });
+
+
+        function buttonClick(id) {
+            window.location.href = `/game?roomid=${id.innerText}`
+        }
+    </script>
+</body>
+</html>
